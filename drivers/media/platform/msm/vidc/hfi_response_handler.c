@@ -16,7 +16,6 @@
 #include <linux/list.h>
 #include <linux/interrupt.h>
 #include <linux/hash.h>
-#include <soc/qcom/smem.h>
 #include "vidc_hfi_helper.h"
 #include "vidc_hfi_io.h"
 #include "msm_vidc_debug.h"

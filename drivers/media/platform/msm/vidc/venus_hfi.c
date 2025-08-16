@@ -31,7 +31,6 @@
 #include <linux/platform_device.h>
 #include <linux/soc/qcom/llcc-qcom.h>
 #include <soc/qcom/scm.h>
-#include <soc/qcom/smem.h>
 #include <soc/qcom/subsystem_restart.h>
 #include "hfi_packetization.h"
 #include "msm_vidc_debug.h"
