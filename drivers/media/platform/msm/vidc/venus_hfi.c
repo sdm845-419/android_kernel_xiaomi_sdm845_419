@@ -605,13 +605,14 @@ static int __smem_alloc(struct venus_hfi_device *dev,
 	struct msm_smem *alloc = &mem->mem_data;
 	int rc = 0;
 
-	if (!dev || !dev->hal_client || !mem || !size) {
+	if (!dev || !mem || !size) {
 		dprintk(VIDC_ERR, "Invalid Params\n");
 		return -EINVAL;
 	}
 
 	dprintk(VIDC_INFO, "start to alloc size: %d, flags: %d\n", size, flags);
-	rc = msm_smem_alloc(size, align, flags, usage, 1, (void *)dev->res,
+	rc = msm_smem_alloc(
+		size, align, flags, usage, 1, (void *)dev->res,
 		MSM_VIDC_UNKNOWN, alloc);
 	if (rc) {
 		dprintk(VIDC_ERR, "Alloc failed\n");
@@ -1420,7 +1421,7 @@ static int __interface_queues_init(struct venus_hfi_device *dev)
 	mem_addr = &dev->mem_addr;
 	if (!is_iommu_present(dev->res))
 		fw_bias = dev->hal_data->firmware_base;
-	rc = __smem_alloc(dev, mem_addr, q_size, 1, 0,
+	rc = __smem_alloc(dev, mem_addr, q_size, 1, SMEM_UNCACHED,
 			HAL_BUFFER_INTERNAL_CMD_QUEUE);
 	if (rc) {
 		dprintk(VIDC_ERR, "iface_q_table_alloc_fail\n");
