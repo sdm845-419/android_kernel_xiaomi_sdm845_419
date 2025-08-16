@@ -35,7 +35,10 @@
 #include "msm_vidc_debug.h"
 #include "venus_hfi.h"
 #include "vidc_hfi_io.h"
-
+//
+#include <soc/qcom/socinfo.h>
+#include <linux/soc/qcom/smem.h>
+//
 #define FIRMWARE_SIZE			0X00A00000
 #define REG_ADDR_OFFSET_BITMASK	0x000FFFFF
 #define QDSS_IOVA_START 0x80001000
@@ -141,7 +144,7 @@ static void __dump_packet(u8 *packet, enum vidc_msg_prio log_level)
 	 * row must contain enough for 0xdeadbaad * 8 to be converted into
 	 * "de ad ba ab " * 8 + '\0'
 	 */
-	char row[3 * row_size];
+	char row[96]; /*char row[3 * row_size];*/
 
 	for (c = 0; c * row_size < packet_size; ++c) {
 		int bytes_to_read = ((c + 1) * row_size > packet_size) ?
@@ -608,8 +611,8 @@ static int __smem_alloc(struct venus_hfi_device *dev,
 	}
 
 	dprintk(VIDC_INFO, "start to alloc size: %d, flags: %d\n", size, flags);
-	rc = msm_smem_alloc(dev->hal_client, size, align, flags,
-		usage, 1, alloc);
+	rc = msm_smem_alloc(size, align, flags, usage, 1, (void *)dev->res,
+		MSM_VIDC_UNKNOWN, alloc);
 	if (rc) {
 		dprintk(VIDC_ERR, "Alloc failed\n");
 		rc = -ENOMEM;
@@ -618,11 +621,6 @@ static int __smem_alloc(struct venus_hfi_device *dev,
 
 	dprintk(VIDC_DBG, "__smem_alloc: ptr = %pK, size = %d\n",
 			alloc->kvaddr, size);
-	rc = msm_smem_cache_operations(dev->hal_client, alloc->handle, 0,
-			alloc->size, SMEM_CACHE_CLEAN);
-	if (rc) {
-		dprintk(VIDC_WARN, "Failed to clean cache\n");
-	}
 
 	mem->mem_size = alloc->size;
 	mem->align_virtual_addr = alloc->kvaddr;
@@ -640,7 +638,7 @@ static void __smem_free(struct venus_hfi_device *dev, struct msm_smem *mem)
 		return;
 	}
 
-	msm_smem_free(dev->hal_client, mem);
+	msm_smem_free(mem);
 }
 
 static void __write_register(struct venus_hfi_device *device,
@@ -925,14 +923,9 @@ static int __tzbsp_set_video_state(enum tzbsp_video_state state)
 	desc.args[1] = cmd.spare = 0;
 	desc.arginfo = SCM_ARGS(2);
 
-	if (!is_scm_armv8()) {
-		rc = scm_call(SCM_SVC_BOOT, TZBSP_VIDEO_SET_STATE, &cmd,
-				sizeof(cmd), &tzbsp_rsp, sizeof(tzbsp_rsp));
-	} else {
-		rc = scm_call2(SCM_SIP_FNID(SCM_SVC_BOOT,
-				TZBSP_VIDEO_SET_STATE), &desc);
-		tzbsp_rsp = desc.ret[0];
-	}
+	rc = scm_call2(SCM_SIP_FNID(SCM_SVC_BOOT,
+			TZBSP_VIDEO_SET_STATE), &desc);
+	tzbsp_rsp = desc.ret[0];
 
 	if (rc) {
 		dprintk(VIDC_ERR, "Failed scm_call %d\n", rc);
@@ -1301,8 +1294,8 @@ static void __interface_queues_release(struct venus_hfi_device *device)
 		}
 
 		mem_map = (struct hfi_mem_map *)(qdss + 1);
-		cb = msm_smem_get_context_bank(device->hal_client,
-					false, HAL_BUFFER_INTERNAL_CMD_QUEUE);
+		cb = msm_smem_get_context_bank(MSM_VIDC_UNKNOWN,
+			false, device->res, HAL_BUFFER_INTERNAL_CMD_QUEUE);
 
 		for (i = 0; cb && i < num_entries; i++) {
 			iommu_unmap(cb->domain,
@@ -1334,7 +1327,6 @@ static void __interface_queues_release(struct venus_hfi_device *device)
 	device->mem_addr.align_virtual_addr = NULL;
 	device->mem_addr.align_device_addr = 0;
 
-	msm_smem_delete_client(device->hal_client);
 	device->hal_client = NULL;
 }
 
@@ -1526,8 +1518,8 @@ static int __interface_queues_init(struct venus_hfi_device *dev)
 		qdss->mem_map_table_base_addr = mem_map_table_base_addr;
 
 		mem_map = (struct hfi_mem_map *)(qdss + 1);
-		cb = msm_smem_get_context_bank(dev->hal_client, false,
-				HAL_BUFFER_INTERNAL_CMD_QUEUE);
+		cb = msm_smem_get_context_bank(MSM_VIDC_UNKNOWN, false,
+			dev->res, HAL_BUFFER_INTERNAL_CMD_QUEUE);
 		if (!cb) {
 			dprintk(VIDC_ERR,
 				"%s: failed to get context bank\n", __func__);
@@ -1675,28 +1667,14 @@ static int venus_hfi_core_init(void *device)
 
 	__set_state(dev, VENUS_STATE_INIT);
 
-	if (!dev->hal_client) {
-		dev->hal_client = msm_smem_new_client(
-				SMEM_ION, dev->res, MSM_VIDC_UNKNOWN);
-		if (dev->hal_client == NULL) {
-			dprintk(VIDC_ERR, "Failed to alloc ION_Client\n");
-			rc = -ENODEV;
-			goto err_core_init;
-		}
+	dprintk(VIDC_DBG, "Dev_Virt: %pa, Reg_Virt: %pK\n",
+		&dev->hal_data->firmware_base,
+		dev->hal_data->register_base);
 
-		dprintk(VIDC_DBG, "Dev_Virt: %pa, Reg_Virt: %pK\n",
-			&dev->hal_data->firmware_base,
-			dev->hal_data->register_base);
-
-		rc = __interface_queues_init(dev);
-		if (rc) {
-			dprintk(VIDC_ERR, "failed to init queues\n");
-			rc = -ENOMEM;
-			goto err_core_init;
-		}
-	} else {
-		dprintk(VIDC_ERR, "hal_client exists\n");
-		rc = -EEXIST;
+	rc = __interface_queues_init(dev);
+	if (rc) {
+		dprintk(VIDC_ERR, "failed to init queues\n");
+		rc = -ENOMEM;
 		goto err_core_init;
 	}
 
@@ -2875,7 +2853,7 @@ static void __flush_debug_queue(struct venus_hfi_device *device, u8 *packet)
 	}
 
 	if (!packet) {
-		packet = kzalloc(VIDC_IFACEQ_VAR_HUGE_PKT_SIZE, GFP_TEMPORARY);
+		packet = kzalloc(VIDC_IFACEQ_VAR_HUGE_PKT_SIZE, GFP_KERNEL);
 		if (!packet) {
 			dprintk(VIDC_ERR, "In %s() Fail to allocate mem\n",
 				__func__);
@@ -3616,7 +3594,7 @@ static int __init_resources(struct venus_hfi_device *device,
 
 	device->sys_init_capabilities =
 		kzalloc(sizeof(struct msm_vidc_capability)
-		* VIDC_MAX_SESSIONS, GFP_TEMPORARY);
+		* VIDC_MAX_SESSIONS, GFP_KERNEL);
 
 	return rc;
 
@@ -3673,15 +3651,10 @@ static int __protect_cp_mem(struct venus_hfi_device *device)
 		}
 	}
 
-	if (!is_scm_armv8()) {
-		rc = scm_call(SCM_SVC_MP, TZBSP_MEM_PROTECT_VIDEO_VAR, &memprot,
-			sizeof(memprot), &resp, sizeof(resp));
-	} else {
-		desc.arginfo = SCM_ARGS(4);
-		rc = scm_call2(SCM_SIP_FNID(SCM_SVC_MP,
-			       TZBSP_MEM_PROTECT_VIDEO_VAR), &desc);
-		resp = desc.ret[0];
-	}
+	desc.arginfo = SCM_ARGS(4);
+	rc = scm_call2(SCM_SIP_FNID(SCM_SVC_MP,
+		       TZBSP_MEM_PROTECT_VIDEO_VAR), &desc);
+	resp = desc.ret[0];
 
 	if (rc) {
 		dprintk(VIDC_ERR, "Failed to protect memory(%d) response: %d\n",
@@ -4235,7 +4208,7 @@ static int venus_hfi_get_fw_info(void *dev, struct hal_fw_info *fw_info)
 {
 	int i = 0, j = 0;
 	struct venus_hfi_device *device = dev;
-	u32 smem_block_size = 0;
+	size_t smem_block_size = 0;
 	u8 *smem_table_ptr;
 	char version[VENUS_VERSION_LENGTH] = "";
 	const u32 smem_image_index_venus = 14 * 128;
@@ -4249,8 +4222,8 @@ static int venus_hfi_get_fw_info(void *dev, struct hal_fw_info *fw_info)
 
 	mutex_lock(&device->lock);
 
-	smem_table_ptr = smem_get_entry(SMEM_IMAGE_VERSION_TABLE,
-			&smem_block_size, 0, SMEM_ANY_HOST_FLAG);
+	smem_table_ptr =qcom_smem_get(QCOM_SMEM_HOST_ANY,
+			SMEM_IMAGE_VERSION_TABLE, &smem_block_size);
 	if (smem_table_ptr &&
 			((smem_image_index_venus +
 			  VENUS_VERSION_LENGTH) <= smem_block_size))
@@ -4433,7 +4406,7 @@ static struct venus_hfi_device *__add_device(u32 device_id,
 	}
 
 	hdevice->raw_packet =
-		kzalloc(VIDC_IFACEQ_VAR_HUGE_PKT_SIZE, GFP_TEMPORARY);
+		kzalloc(VIDC_IFACEQ_VAR_HUGE_PKT_SIZE, GFP_KERNEL);
 	if (!hdevice->raw_packet) {
 		dprintk(VIDC_ERR, "failed to allocate raw packet\n");
 		goto err_cleanup;

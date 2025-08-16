@@ -20,7 +20,10 @@
 #include "vidc_hfi_io.h"
 #include "msm_vidc_debug.h"
 #include "vidc_hfi.h"
-
+//
+#include <soc/qcom/socinfo.h>
+#include <linux/soc/qcom/smem.h>
+//
 static enum vidc_status hfi_parse_init_done_properties(
 		struct msm_vidc_capability *capability,
 		u32 num_sessions, u8 *data_ptr, u32 num_properties,
@@ -1916,8 +1919,8 @@ static void hfi_process_sys_get_prop_image_version(
 		struct hfi_msg_sys_property_info_packet *pkt)
 {
 	int i = 0;
-	u32 smem_block_size = 0;
 	u8 *smem_table_ptr;
+	size_t smem_block_size = 0;
 	char version[256];
 	const u32 version_string_size = 128;
 	const u32 smem_image_index_venus = 14 * 128;
@@ -1948,8 +1951,8 @@ static void hfi_process_sys_get_prop_image_version(
 	version[i] = '\0';
 	dprintk(VIDC_DBG, "F/W version: %s\n", version);
 
-	smem_table_ptr = smem_get_entry(SMEM_IMAGE_VERSION_TABLE,
-			&smem_block_size, 0, SMEM_ANY_HOST_FLAG);
+	smem_table_ptr = qcom_smem_get(QCOM_SMEM_HOST_ANY,
+			SMEM_IMAGE_VERSION_TABLE, &smem_block_size);
 	if ((smem_image_index_venus + version_string_size) <= smem_block_size &&
 			smem_table_ptr)
 		memcpy(smem_table_ptr + smem_image_index_venus,

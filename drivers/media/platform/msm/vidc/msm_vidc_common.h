@@ -157,9 +157,9 @@ bool msm_comm_fetch_tags(struct msm_vidc_inst *inst,
 		struct vidc_tag_data *tag_data);
 void msm_comm_free_buffer_tags(struct msm_vidc_inst *inst);
 int msm_comm_qbuf_cache_operations(struct msm_vidc_inst *inst,
-		struct v4l2_buffer *b);
+		struct msm_vidc_buffer *mbuf);
 int msm_comm_dqbuf_cache_operations(struct msm_vidc_inst *inst,
-			struct v4l2_buffer *b);
+		struct msm_vidc_buffer *mbuf);
 void print_vidc_buffer(u32 tag, const char *str, struct msm_vidc_inst *inst,
 		struct msm_vidc_buffer *mbuf);
 void print_vb2_buffer(u32 tag, const char *str, struct msm_vidc_inst *inst,

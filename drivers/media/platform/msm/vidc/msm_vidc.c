@@ -509,8 +509,6 @@ int msm_vidc_qbuf(void *instance, struct v4l2_buffer *b)
 		b->m.planes[i].data_offset = b->m.planes[i].reserved[1];
 	}
 
-	msm_comm_qbuf_cache_operations(inst, b);
-
 	/* Compression ratio is valid only for Encoder YUV buffers. */
 	if (inst->session_type == MSM_VIDC_ENCODER &&
 			b->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
@@ -577,7 +575,6 @@ int msm_vidc_dqbuf(void *instance, struct v4l2_buffer *b)
 		return rc;
 	}
 
-	msm_comm_dqbuf_cache_operations(inst, b);
 	for (i = 0; i < b->length; i++) {
 		b->m.planes[i].reserved[0] = b->m.planes[i].m.fd;
 		b->m.planes[i].reserved[1] = b->m.planes[i].data_offset;
@@ -1788,12 +1785,13 @@ void *msm_vidc_open(int core_id, int session_type)
 		i <= SESSION_MSG_INDEX(SESSION_MSG_END); i++) {
 		init_completion(&inst->completions[i]);
 	}
-	inst->mem_client = msm_smem_new_client(SMEM_ION,
-					&inst->core->resources, session_type);
-	if (!inst->mem_client) {
-		dprintk(VIDC_ERR, "Failed to create memory client\n");
-		goto fail_mem_client;
-	}
+// TODO: FIXME OR REM
+//	inst->mem_client = msm_smem_new_client(SMEM_ION,
+//					&inst->core->resources, session_type);
+//	if (!inst->mem_client) {
+//		dprintk(VIDC_ERR, "Failed to create memory client\n");
+//		goto fail_mem_client;
+//	}
 
 	if (session_type == MSM_VIDC_DECODER) {
 		msm_vdec_inst_init(inst);
@@ -1861,8 +1859,8 @@ fail_bufq_output:
 	vb2_queue_release(&inst->bufq[CAPTURE_PORT].vb2_bufq);
 fail_bufq_capture:
 	msm_comm_ctrl_deinit(inst);
-	msm_smem_delete_client(inst->mem_client);
-fail_mem_client:
+//	msm_smem_delete_client(inst->mem_client);
+//fail_mem_client://
 	mutex_destroy(&inst->sync_lock);
 	mutex_destroy(&inst->bufq[CAPTURE_PORT].lock);
 	mutex_destroy(&inst->bufq[OUTPUT_PORT].lock);
@@ -2042,7 +2040,7 @@ int msm_vidc_close(void *instance)
 	}
 
 	msm_comm_session_clean(inst);
-	msm_smem_delete_client(inst->mem_client);
+//	msm_smem_delete_client(inst->mem_client);
 
 	kref_put(&inst->kref, close_helper);
 	return 0;
