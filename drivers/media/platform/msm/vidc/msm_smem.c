@@ -114,7 +114,6 @@ static int msm_dma_get_device_address(struct dma_buf *dbuf, unsigned long align,
 		mapping_info->table = table;
 		mapping_info->attach = attach;
 		mapping_info->buf = dbuf;
-		mapping_info->cb_info = (void *)cb;
 
 		trace_msm_smem_buffer_iommu_op_end("MAP", 0, 0,
 			align, *iova, *buffer_size);
@@ -145,8 +144,7 @@ static int msm_dma_put_device_address(u32 flags,
 	}
 
 	if (!mapping_info->dev || !mapping_info->table ||
-		!mapping_info->buf || !mapping_info->attach ||
-		!mapping_info->cb_info) {
+		!mapping_info->buf || !mapping_info->attach {
 		dprintk(VIDC_WARN, "Invalid params\n");
 		return -EINVAL;
 	}
@@ -162,8 +160,6 @@ static int msm_dma_put_device_address(u32 flags,
 	mapping_info->table = NULL;
 	mapping_info->attach = NULL;
 	mapping_info->buf = NULL;
-	mapping_info->cb_info = NULL;
-
 
 	return rc;
 }
