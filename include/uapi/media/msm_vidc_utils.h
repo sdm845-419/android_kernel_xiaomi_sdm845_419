@@ -328,18 +328,6 @@ struct msm_vidc_metadata_ltr_payload {
 /*default when layer ID isn't specified*/
 #define MSM_VIDC_ALL_LAYER_ID 0xFF
 
-static inline unsigned int VENUS_EXTRADATA_SIZE(int width, int height)
-{
-	(void)height;
-	(void)width;
-
-	/*
-	 * In the future, calculate the size based on the w/h but just
-	 * hardcode it for now since 16K satisfies all current usecases.
-	 */
-	return 16 * 1024;
-}
-
 /* V4L2_CID_MPEG_VIDC_VENC_HDR_INFO payload index */
 enum msm_vidc_hdr_info_types {
 	MSM_VIDC_RGB_PRIMARY_00,
