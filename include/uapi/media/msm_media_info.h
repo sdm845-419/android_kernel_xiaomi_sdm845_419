@@ -90,7 +90,6 @@ enum color_fmts {
 	 *          + UV_Stride * UV_Scanlines
 	 *          + max(Extradata, Y_Stride * 8), 4096)
 	 */
-	COLOR_FMT_NV21,
 	COLOR_FMT_NV12_128,
 	/* Venus NV12_MVTB:
 	 * Two YUV 4:2:0 images/views one after the other
@@ -150,6 +149,7 @@ enum color_fmts {
 	 * Total size = align((2*(Y_Stride * Y_Scanlines)
 	 *          + 2*(UV_Stride * UV_Scanlines) + Extradata), 4096)
 	 */
+	COLOR_FMT_NV21,
 	COLOR_FMT_NV12_MVTB,
 	/*
 	 * The buffer can be of 2 types:
