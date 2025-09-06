@@ -1860,8 +1860,6 @@ fail_bufq_output:
 	vb2_queue_release(&inst->bufq[CAPTURE_PORT].vb2_bufq);
 fail_bufq_capture:
 	msm_comm_ctrl_deinit(inst);
-//	msm_smem_delete_client(inst->mem_client);
-//fail_mem_client://
 	mutex_destroy(&inst->sync_lock);
 	mutex_destroy(&inst->bufq[CAPTURE_PORT].lock);
 	mutex_destroy(&inst->bufq[OUTPUT_PORT].lock);
@@ -2041,7 +2039,6 @@ int msm_vidc_close(void *instance)
 	}
 
 	msm_comm_session_clean(inst);
-//	msm_smem_delete_client(inst->mem_client);
 
 	kref_put(&inst->kref, close_helper);
 	return 0;

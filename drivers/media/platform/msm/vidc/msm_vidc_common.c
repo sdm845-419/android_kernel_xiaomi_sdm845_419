@@ -3454,7 +3454,7 @@ static int set_output_buffers(struct msm_vidc_inst *inst,
 {
 	int rc = 0;
 	struct internal_buf *binfo = NULL;
-	u32 smem_flags = 0, buffer_size;
+	u32 smem_flags = SMEM_UNCACHED, buffer_size;
 	struct hal_buffer_requirements *output_buf, *extradata_buf;
 	int i;
 	struct hfi_device *hdev;
@@ -3668,7 +3668,7 @@ static int allocate_and_set_internal_bufs(struct msm_vidc_inst *inst,
 			struct msm_vidc_list *buf_list)
 {
 	struct internal_buf *binfo;
-	u32 smem_flags = 0;
+	u32 smem_flags = SMEM_UNCACHED;
 	int rc = 0;
 	int i = 0;
 
@@ -3971,7 +3971,7 @@ int msm_vidc_comm_cmd(void *instance, union msm_v4l2_cmd *cmd)
 	case V4L2_DEC_CMD_STOP:
 	{
 		struct eos_buf *binfo = NULL;
-		u32 smem_flags = 0;
+		u32 smem_flags = SMEM_UNCACHED;
 
 		if (inst->state != MSM_VIDC_START_DONE) {
 			dprintk(VIDC_DBG,
