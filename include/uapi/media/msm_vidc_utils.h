@@ -114,6 +114,16 @@ struct msm_vidc_digital_zoom_payload {
 	unsigned int zoom_height;
 };
 
+struct msm_vidc_input_crop_payload {
+	unsigned int size;
+	unsigned int version;
+	unsigned int port_index;
+	unsigned int left;
+	unsigned int top;
+	unsigned int width;
+	unsigned int height;
+};
+
 #define MSM_VIDC_EXTRADATA_INDEX 0x7F100002
 struct msm_vidc_extradata_index {
 	unsigned int type;
@@ -360,16 +370,6 @@ struct msm_vidc_vc1_seqdisp_payload {
 	unsigned int aspect_ratio;
 	unsigned int aspect_horiz;
 	unsigned int aspect_vert;
-};
-
-struct msm_vidc_input_crop_payload {
-	unsigned int size;
-	unsigned int version;
-	unsigned int port_index;
-	unsigned int left;
-	unsigned int top;
-	unsigned int width;
-	unsigned int height;
 };
 
 /* VPx color_space values */
