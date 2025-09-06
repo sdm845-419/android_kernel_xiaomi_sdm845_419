@@ -1,5 +1,6 @@
-#ifndef __MEDIA_INFO_H__
-#define __MEDIA_INFO_H__
+/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
+#ifndef __MSM_MEDIA_INFO_H__
+#define __MSM_MEDIA_INFO_H__
 
 #ifndef MSM_MEDIA_ALIGN
 #define MSM_MEDIA_ALIGN(__sz, __align) (((__align) & ((__align) - 1)) ?\
@@ -848,6 +849,17 @@ enum color_fmts {
 #define COLOR_FMT_P010_UBWC		COLOR_FMT_P010_UBWC
 #define COLOR_FMT_P010		COLOR_FMT_P010
 #define COLOR_FMT_NV12_512		COLOR_FMT_NV12_512
+
+static inline unsigned int VENUS_EXTRADATA_SIZE(int width, int height)
+{
+	(void)height;
+	(void)width;
+	/*
+	 * In the future, calculate the size based on the w/h but just
+	 * hardcode it for now since 16K satisfies all current usecases.
+	 */
+	return 16 * 1024;
+}
 
 /*
  * Function arguments:
