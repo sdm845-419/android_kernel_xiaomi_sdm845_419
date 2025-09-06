@@ -4,6 +4,10 @@
 
 #include <linux/types.h>
 
+#if defined(CONFIG_ARCH_SDM845)
+#define VENUS_USES_LEGACY_MISR_INFO
+#endif
+
 /* Color formats */
 #define MSM_VIDC_EXTRADATA_NONE 0x00000000
 #define MSM_VIDC_HAL_INTERLACE_COLOR_FORMAT_NV12	0x2
@@ -68,6 +72,14 @@ struct msm_vidc_aspect_ratio_payload {
 	unsigned int aspect_height;
 };
 
+#ifdef VENUS_USES_LEGACY_MISR_INFO
+struct msm_vidc_misr_info {
+	unsigned int misr_dpb_luma;
+	unsigned int misr_dpb_chroma;
+	unsigned int misr_opb_luma;
+	unsigned int misr_opb_chroma;
+};
+#else
 struct msm_vidc_misr_info {
 	unsigned int misr_set;
 	unsigned int misr_dpb_luma[8];
@@ -75,6 +87,8 @@ struct msm_vidc_misr_info {
 	unsigned int misr_opb_luma[8];
 	unsigned int misr_opb_chroma[8];
 };
+#endif
+
 #define MSM_VIDC_EXTRADATA_OUTPUT_CROP 0x0700000F
 struct msm_vidc_output_crop_payload {
 	unsigned int size;
