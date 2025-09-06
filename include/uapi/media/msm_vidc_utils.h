@@ -248,10 +248,9 @@ struct msm_vidc_mastering_display_colour_sei_payload {
 	unsigned int nMinDisplayMasteringLuminance;
 };
 
-#define MSM_VIDC_EXTRADATA_CONTENT_LIGHT_LEVEL_SEI 0x00000016
 struct msm_vidc_content_light_level_sei_payload {
 	unsigned int nMaxContentLight;
-	unsigned int nMaxContentLight;
+	unsigned int nMaxPicAverageLight;
 };
 
 #define MSM_VIDC_EXTRADATA_HDR10PLUS_METADATA 0x0000001A
@@ -264,6 +263,24 @@ struct msm_vidc_hdr10plus_metadata_payload {
 struct msm_vidc_enc_cvp_metadata_payload {
 	unsigned int data[256];
 };
+
+/* msm_vidc_legacy */
+#define MSM_VIDC_EXTRADATA_UBWC_CR_STAT_INFO 0x00000019
+#define MSM_VIDC_EXTRADATA_HDR10PLUS_METADATA 0x0000001A
+#define MSM_VIDC_EXTRADATA_INPUT_CROP 0x0700000E
+#define MSM_VIDC_EXTRADATA_METADATA_MBI 0x7F100005
+#define MSM_VIDC_EXTRADATA_METADATA_LTR 0x7F100004
+#define MSM_VIDC_EXTRADATA_ASPECT_RATIO 0x7F100003
+#define MSM_VIDC_EXTRADATA_VQZIP_SEI 0x00000011
+#define MSM_VIDC_EXTRADATA_CONTENT_LIGHT_LEVEL_SEI 0x00000016
+
+/* enum msm_vidc_framepack_type_legacy */
+#define MSM_VIDC_FRAMEPACK_CHECKERBOARD 0x00
+#define MSM_VIDC_FRAMEPACK_COLUMN_INTERLEAVE 0x01
+#define MSM_VIDC_FRAMEPACK_ROW_INTERLEAVE 0x02
+#define MSM_VIDC_FRAMEPACK_SIDE_BY_SIDE 0x03
+#define MSM_VIDC_FRAMEPACK_TOP_BOTTOM 0x04
+#define MSM_VIDC_FRAMEPACK_TEMPORAL_INTERLEAVE 0x05
 
 /* video_format */
 #define MSM_VIDC_COMPONENT 0
