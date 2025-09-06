@@ -12,7 +12,6 @@
 #define MSM_VIDC_4x_1 0x1
 #define MSM_VIDC_EXTRADATA_FRAME_QP_ADV 0x1
 
-
 static inline unsigned int VENUS_EXTRADATA_SIZE(int width, int height)
 {
 	(void)height;
