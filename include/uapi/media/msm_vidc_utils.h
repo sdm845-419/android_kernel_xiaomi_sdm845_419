@@ -4,14 +4,21 @@
 
 #include <linux/types.h>
 
+/* Color formats */
 #define MSM_VIDC_EXTRADATA_NONE 0x00000000
+#define MSM_VIDC_HAL_INTERLACE_COLOR_FORMAT_NV12	0x2
+#define MSM_VIDC_HAL_INTERLACE_COLOR_FORMAT_NV12_UBWC	0x8002
+#define MSM_VIDC_4x_1 0x1
+#define MSM_VIDC_EXTRADATA_FRAME_QP_ADV 0x1
+#define MSM_VIDC_EXTRADATA_INTERLACE_VIDEO 0x00000002
+
 struct msm_vidc_extradata_header {
-	__u32 size;
-	__u32 version; /** Keeping binary compatibility */
-	__u32 port_index; /* with firmware and OpenMAX IL **/
-	__u32 type; /* msm_vidc_extradata_type */
-	__u32 data_size;
-	__u32 data[1];
+	unsigned int size;
+	unsigned int:32; /** Keeping binary compatibility */
+	unsigned int:32; /* with firmware and OpenMAX IL **/
+	unsigned int type; /* msm_vidc_extradata_type */
+	unsigned int data_size;
+	unsigned char data[1];
 };
 
 /* msm_vidc_interlace_type */
@@ -21,29 +28,26 @@ struct msm_vidc_extradata_header {
 #define MSM_VIDC_INTERLACE_FRAME_TOPFIELDFIRST 0x08
 #define MSM_VIDC_INTERLACE_FRAME_BOTTOMFIELDFIRST 0x10
 #define MSM_VIDC_INTERLACE_FRAME_MBAFF 0x20
-/* Color formats */
-#define MSM_VIDC_HAL_INTERLACE_COLOR_FORMAT_NV12	0x2
-#define MSM_VIDC_HAL_INTERLACE_COLOR_FORMAT_NV12_UBWC	0x8002
-#define MSM_VIDC_EXTRADATA_INTERLACE_VIDEO 0x00000002
+
 struct msm_vidc_interlace_payload {
-	__u32 format; /* Interlace format */
-	__u32 color_format;
+	unsigned int format; /* Interlace format */
+	unsigned int color_format;
 };
 
 #define MSM_VIDC_EXTRADATA_FRAME_RATE 0x00000007
 struct msm_vidc_framerate_payload {
-	__u32 frame_rate; /*In Q16 format */
+	unsigned int frame_rate;; /*In Q16 format */
 };
 
 #define MSM_VIDC_EXTRADATA_TIMESTAMP 0x00000005
 struct msm_vidc_ts_payload {
-	__u32 timestamp_lo;
-	__u32 timestamp_hi;
+	unsigned int timestamp_lo;
+	unsigned int timestamp_hi;
 };
 
 #define MSM_VIDC_EXTRADATA_NUM_CONCEALED_MB 0x7F100001
 struct msm_vidc_concealmb_payload {
-	__u32 num_mbs;
+	unsigned int num_mbs;
 };
 
 
@@ -52,59 +56,69 @@ struct msm_vidc_concealmb_payload {
 #define MSM_VIDC_FRAME_RECONSTRUCTION_APPROXIMATELY_CORRECT 0x02
 #define MSM_VIDC_EXTRADATA_RECOVERY_POINT_SEI 0x00000009
 struct msm_vidc_recoverysei_payload {
-	__u32 flags;
+	unsigned int flags;
 };
 
 #define MSM_VIDC_EXTRADATA_ASPECT_RATIO 0x7F100003
 struct msm_vidc_aspect_ratio_payload {
-	__u32 size;
-	__u32 version;
-	__u32 port_index;
-	__u32 aspect_width;
-	__u32 aspect_height;
+	unsigned int size;
+	unsigned int version;
+	unsigned int port_index;
+	unsigned int aspect_width;
+	unsigned int aspect_height;
 };
 
 struct msm_vidc_misr_info {
-	__u32 misr_set;
-	__u32 misr_dpb_luma[8];
-	__u32 misr_dpb_chroma[8];
-	__u32 misr_opb_luma[8];
-	__u32 misr_opb_chroma[8];
+	unsigned int misr_set;
+	unsigned int misr_dpb_luma[8];
+	unsigned int misr_dpb_chroma[8];
+	unsigned int misr_opb_luma[8];
+	unsigned int misr_opb_chroma[8];
 };
 #define MSM_VIDC_EXTRADATA_OUTPUT_CROP 0x0700000F
 struct msm_vidc_output_crop_payload {
-	__u32 size;
-	__u32 version;
-	__u32 port_index;
-	__u32 left;
-	__u32 top;
-	__u32 display_width;
-	__u32 display_height;
-	__u32 width;
-	__u32 height;
-	__u32 frame_num;
-	__u32 bit_depth_y;
-	__u32 bit_depth_c;
+	unsigned int size;
+	unsigned int version;
+	unsigned int port_index;
+	unsigned int left;
+	unsigned int top;
+	unsigned int display_width;
+	unsigned int display_height;
+	unsigned int width;
+	unsigned int height;
+	unsigned int frame_num;
+	unsigned int bit_depth_y;
+	unsigned int bit_depth_c;
 	struct msm_vidc_misr_info misr_info[2];
+};
+
+struct msm_vidc_digital_zoom_payload {
+	unsigned int size;
+	unsigned int version;
+	unsigned int port_index;
+	unsigned int zoom_width;
+	unsigned int zoom_height;
 };
 
 #define MSM_VIDC_EXTRADATA_INDEX 0x7F100002
 struct msm_vidc_extradata_index {
-	__u32 type;
+	unsigned int type;
 	union {
+		struct msm_vidc_input_crop_payload input_crop;
+		struct msm_vidc_digital_zoom_payload digital_zoom;
 		struct msm_vidc_aspect_ratio_payload aspect_ratio;
 	};
 };
 
 #define MSM_VIDC_EXTRADATA_PANSCAN_WINDOW 0x00000008
 struct msm_vidc_panscan_window {
-	__u32 panscan_height_offset;
-	__u32 panscan_width_offset;
-	__u32 panscan_window_width;
-	__u32 panscan_window_height;
+	unsigned int panscan_height_offset;
+	unsigned int panscan_width_offset;
+	unsigned int panscan_window_width;
+	unsigned int panscan_window_height;
 };
 struct msm_vidc_panscan_window_payload {
-	__u32 num_panscan_windows;
+	unsigned int num_panscan_windows;
 	struct msm_vidc_panscan_window wnd[1];
 };
 
@@ -114,87 +128,117 @@ struct msm_vidc_panscan_window_payload {
 #define MSM_VIDC_USERDATA_TYPE_BOTTOM_FIELD 0x3
 #define MSM_VIDC_EXTRADATA_STREAM_USERDATA 0x0000000E
 struct msm_vidc_stream_userdata_payload {
-	__u32 type;
-	__u32 data[1];
+	unsigned int type;
+	unsigned int data[1];
 };
 
 #define MSM_VIDC_EXTRADATA_FRAME_QP 0x0000000F
 struct msm_vidc_frame_qp_payload {
-	__u32 frame_qp;
-	__u32 qp_sum;
-	__u32 skip_qp_sum;
-	__u32 skip_num_blocks;
-	__u32 total_num_blocks;
+	unsigned int frame_qp;
+	unsigned int qp_sum;
+	unsigned int skip_qp_sum;
+	unsigned int skip_num_blocks;
+	unsigned int total_num_blocks;
 };
 
 #define MSM_VIDC_EXTRADATA_FRAME_BITS_INFO 0x00000010
 struct msm_vidc_frame_bits_info_payload {
-	__u32 frame_bits;
-	__u32 header_bits;
+	unsigned int frame_bits;
+	unsigned int header_bits;
 };
 
 #define MSM_VIDC_EXTRADATA_S3D_FRAME_PACKING 0x00000006
 struct msm_vidc_s3d_frame_packing_payload {
-	__u32 fpa_id;
-	__u32 cancel_flag;
-	__u32 fpa_type;
-	__u32 quin_cunx_flag;
-	__u32 content_interprtation_type;
-	__u32 spatial_flipping_flag;
-	__u32 frame0_flipped_flag;
-	__u32 field_views_flag;
-	__u32 current_frame_is_frame0_flag;
-	__u32 frame0_self_contained_flag;
-	__u32 frame1_self_contained_flag;
-	__u32 frame0_graid_pos_x;
-	__u32 frame0_graid_pos_y;
-	__u32 frame1_graid_pos_x;
-	__u32 frame1_graid_pos_y;
-	__u32 fpa_reserved_byte;
-	__u32 fpa_repetition_period;
-	__u32 fpa_extension_flag;
+	unsigned int fpa_id;
+	unsigned int cancel_flag;
+	unsigned int fpa_type;
+	unsigned int quin_cunx_flag;
+	unsigned int content_interprtation_type;
+	unsigned int spatial_flipping_flag;
+	unsigned int frame0_flipped_flag;
+	unsigned int field_views_flag;
+	unsigned int current_frame_is_frame0_flag;
+	unsigned int frame0_self_contained_flag;
+	unsigned int frame1_self_contained_flag;
+	unsigned int frame0_graid_pos_x;
+	unsigned int frame0_graid_pos_y;
+	unsigned int frame1_graid_pos_x;
+	unsigned int frame1_graid_pos_y;
+	unsigned int fpa_reserved_byte;
+	unsigned int fpa_repetition_period;
+	unsigned int fpa_extension_flag;
+};
+
+struct msm_vidc_vqzip_sei_payload {
+	unsigned int size;
+	unsigned int data[1];
+};
+
+struct msm_vidc_ubwc_cr_stats_info {
+	unsigned int stats_tile_32;
+	unsigned int stats_tile_64;
+	unsigned int stats_tile_96;
+	unsigned int stats_tile_128;
+	unsigned int stats_tile_160;
+	unsigned int stats_tile_192;
+	unsigned int stats_tile_256;
+};
+
+struct msm_vidc_yuv_stats_payload {
+	unsigned int frame_qp;
+	unsigned int texture;
+	unsigned int luma_in_q16;
+	unsigned int frame_difference;
 };
 
 struct msm_vidc_roi_qp_payload {
-	__s32 upper_qp_offset;
-	__s32 lower_qp_offset;
-	__u32 b_roi_info;
-	__u32 mbi_info_size;
-	__u32 data[1];
+	int upper_qp_offset;
+	int lower_qp_offset;
+	unsigned int b_roi_info;
+	int mbi_info_size;
+	unsigned int data[1];
+};
+
+struct msm_vidc_ipb_roi_qp_payload {
+	signed int nUpperQpOffset[3];
+	signed int nLowerQpOffset[3];
+	unsigned int b_roi_info;
+	int mbi_info_size;
+	unsigned int data[1];
 };
 
 #define MSM_VIDC_EXTRADATA_ROI_QP 0x00000013
 struct msm_vidc_roi_deltaqp_payload {
-	__u32 b_roi_info; /*Enable/Disable*/
-	__u32 mbi_info_size; /*Size of QP data*/
-	__u32 data[1];
+	unsigned int b_roi_info; /*Enable/Disable*/
+	int mbi_info_size; /*Size of QP data*/
+	unsigned int data[1];
 };
 
 #define MSM_VIDC_EXTRADATA_MASTERING_DISPLAY_COLOUR_SEI 0x00000015
 struct msm_vidc_mastering_display_colour_sei_payload {
-	__u32 nDisplayPrimariesX[3];
-	__u32 nDisplayPrimariesY[3];
-	__u32 nWhitePointX;
-	__u32 nWhitePointY;
-	__u32 nMaxDisplayMasteringLuminance;
-	__u32 nMinDisplayMasteringLuminance;
+	unsigned int nDisplayPrimariesX[3];
+	unsigned int nDisplayPrimariesY[3];
+	unsigned int nWhitePointX;
+	unsigned int nWhitePointY;
+	unsigned int nMaxDisplayMasteringLuminance;
+	unsigned int nMinDisplayMasteringLuminance;
 };
 
 #define MSM_VIDC_EXTRADATA_CONTENT_LIGHT_LEVEL_SEI 0x00000016
 struct msm_vidc_content_light_level_sei_payload {
-	__u32 nMaxContentLight;
-	__u32 nMaxPicAverageLight;
+	unsigned int nMaxContentLight;
+	unsigned int nMaxContentLight;
 };
 
 #define MSM_VIDC_EXTRADATA_HDR10PLUS_METADATA 0x0000001A
 struct msm_vidc_hdr10plus_metadata_payload {
-	__u32 size;
-	__u32 data[1];
+	unsigned int size;
+	unsigned int data[1];
 };
 
 #define  MSM_VIDC_EXTRADATA_CVP_METADATA 0x0000001B
 struct msm_vidc_enc_cvp_metadata_payload {
-	__u32 data[256];
+	unsigned int data[256];
 };
 
 /* video_format */
@@ -260,36 +304,58 @@ struct msm_vidc_enc_cvp_metadata_payload {
 
 #define MSM_VIDC_EXTRADATA_VUI_DISPLAY_INFO 0x7F100006
 struct msm_vidc_vui_display_info_payload {
-	__u32 video_signal_present_flag;
-	__u32 video_format;
-	__u32 bit_depth_y;
-	__u32 bit_depth_c;
-	__u32 video_full_range_flag;
-	__u32 color_description_present_flag;
-	__u32 color_primaries;
-	__u32 transfer_char;
-	__u32 matrix_coeffs;
-	__u32 chroma_location_info_present_flag;
-	__u32 chroma_format_idc;
-	__u32 separate_color_plane_flag;
-	__u32 chroma_sample_loc_type_top_field;
-	__u32 chroma_sample_loc_type_bottom_field;
+	unsigned int video_signal_present_flag;
+	unsigned int video_format;
+	unsigned int bit_depth_y;
+	unsigned int bit_depth_c;
+	unsigned int video_full_range_flag;
+	unsigned int color_description_present_flag;
+	unsigned int color_primaries;
+	unsigned int transfer_characteristics;
+	unsigned int matrix_coefficients;
+	unsigned int chroma_location_info_present_flag;
+	unsigned int chroma_format_idc;
+	unsigned int separate_color_plane_flag;
+	unsigned int chroma_sample_loc_type_top_field;
+	unsigned int chroma_sample_loc_type_bottom_field;
 };
 
 #define  MSM_VIDC_EXTRADATA_HDR_HIST 0x7F100008
 struct msm_vidc_extradata_hdr_hist_payload {
-	__u32 value_count[1024];
+	unsigned int value_count[1024];
 };
 
 #define MSM_VIDC_EXTRADATA_MPEG2_SEQDISP 0x0000000D
 struct msm_vidc_mpeg2_seqdisp_payload {
-	__u32 video_format;
-	__u32 color_descp;
-	__u32 color_primaries;
-	__u32 transfer_char;
-	__u32 matrix_coeffs;
-	__u32 disp_width;
-	__u32 disp_height;
+	unsigned int video_format;
+	unsigned int color_descp;
+	unsigned int color_primaries;
+	unsigned int transfer_char;
+	unsigned int matrix_coeffs;
+	unsigned int disp_width;
+	unsigned int disp_height;
+};
+
+struct msm_vidc_vc1_seqdisp_payload {
+	unsigned int prog_seg_format;
+	unsigned int uv_sampl_fmt;
+	unsigned int color_format;
+	unsigned int color_primaries;
+	unsigned int transfer_char;
+	unsigned int matrix_coeffs;
+	unsigned int aspect_ratio;
+	unsigned int aspect_horiz;
+	unsigned int aspect_vert;
+};
+
+struct msm_vidc_input_crop_payload {
+	unsigned int size;
+	unsigned int version;
+	unsigned int port_index;
+	unsigned int left;
+	unsigned int top;
+	unsigned int width;
+	unsigned int height;
 };
 
 /* VPx color_space values */
@@ -303,17 +369,17 @@ struct msm_vidc_mpeg2_seqdisp_payload {
 #define MSM_VIDC_CS_RGB 7
 #define MSM_VIDC_EXTRADATA_VPX_COLORSPACE_INFO 0x00000014
 struct msm_vidc_vpx_colorspace_payload {
-	__u32 color_space;
-	__u32 yuv_range_flag;
-	__u32 sumsampling_x;
-	__u32 sumsampling_y;
+	unsigned int color_space;
+	unsigned int yuv_range_flag;
+	unsigned int sumsampling_x;
+	unsigned int sumsampling_y;
 };
 
 #define MSM_VIDC_EXTRADATA_METADATA_LTRINFO 0x7F100004
 /* Don't use the #define below. It is to bypass checkpatch */
 #define LTRINFO MSM_VIDC_EXTRADATA_METADATA_LTRINFO
 struct msm_vidc_metadata_ltr_payload {
-	__u32 ltr_use_mark;
+	unsigned int ltr_use_mark;
 };
 
 /* ptr[2]: event_notify: pixel_depth */
