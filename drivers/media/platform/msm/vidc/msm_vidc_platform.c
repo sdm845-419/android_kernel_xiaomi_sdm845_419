@@ -652,7 +652,7 @@ static struct msm_vidc_common_data sdm845_common_data[] = {
 	},
 	{
 		.key = "qcom,max-secure-instances",
-		.value = 3,
+		.value = 2,
 	},
 	{
 		.key = "qcom,max-hw-load",
